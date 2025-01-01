@@ -121,5 +121,5 @@ watchfiles==0.22.0
 wcwidth==0.2.13
 weaviate-client==4.7.1
 websockets==12.0
-Werkzeug==3.0.4
+Werkzeug==3.0.6
 yarl==1.9.4
