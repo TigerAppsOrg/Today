@@ -26,7 +26,7 @@
 		"react-query": "^3.39.3",
 		"react-router-dom": "^6.26.1",
 		"remark-gfm": "3.0.1",
-		"store2": "^2.14.2",
+		"store2": "^2.14.4",
 		"uuid": "^10.0.0",
 		"uuidv4": "^6.2.13",
 		"zustand": "^4.3.6"
