@@ -1,10 +1,10 @@
 name: get-emails
 
 on:
-  # push:
-  #   branches: [ main ]
-  # schedule:
-  #   - cron: "*/30 * * * *" # run every 30mins instaed of every hr @ the 30min mark
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *" # run every 30mins instaed of every hr @ the 30min mark
 
   workflow_dispatch:
 
@@ -30,3 +30,5 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           MONGO_CONN: ${{ secrets.MONGO_CONN }}
           GMAIL_TOKEN_JSON: ${{ secrets.GMAIL_TOKEN_JSON }}
+          PROTON_USERNAME: ${{ secrets.PROTON_USERNAME }}
+          PROTON_PASSWORD: ${{ secrets.PROTON_PASSWORD }}
