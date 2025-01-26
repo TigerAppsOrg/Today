@@ -98,6 +98,8 @@ The last steps are required because the build command updates the `dist` folder 
 
 Follow the instructions [here](https://capacitorjs.com/docs/basics/workflow).
 
+Mobile app development is currently on pause because not enough time and auth needs to be figured out from within the app. Currently, the api rejects all app requests because login with CAS is not present. But also the login needs to be accessible to Apple testers in order to publish the app. Idea for later: ask for Princeton email (validate princeton.edu), send temporary code, have them enter code and then it remembers access.
+
 ## Deployment
 
 ### Chatbot UI and server (for widget data and chatbot)
