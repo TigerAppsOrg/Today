@@ -28,13 +28,9 @@ def compute_email_hash(subject, sender, body):
     email_content = f"{subject}{sender}{body}"
     return hashlib.md5(email_content.encode('utf-8')).hexdigest()
 
-def extract_text_from_html(html_string: str):
-    soup = BeautifulSoup(html_string, 'html.parser')
-    return re.sub(r'\s+', ' ', soup.get_text()).strip()
-
 def read_email(message: Message):
     text_parts = []
-    extracted_links = extract_text_and_links_from_html(message.body)
+    text, extracted_links = extract_text_and_links_from_html(message.body)
     ids = []
     docs = []
 
@@ -46,7 +42,7 @@ def read_email(message: Message):
     # Emphasize the subject line
     text_parts.append(f"SUBJECT: {subject}")
     text_parts.append(f"From: {sender}")
-    text_parts.append(f"Body: {extract_text_from_html(message.body)}")
+    text_parts.append(f"Body: {text}")
 
     page_content = "\n".join(text_parts)
 
