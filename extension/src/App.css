@@ -305,7 +305,20 @@ td {
 
 .name-row {
   margin-top: 5% !important;
-  margin-bottom: 6% !important;
+  margin-bottom: 1% !important;
+}
+
+.header-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.header-block .weather {
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  max-width: fit-content;
 }
 
 .header {
@@ -316,7 +329,7 @@ td {
 
 .greeting {
   color: white !important;
-  font-size: 90px !important;
+  font-size: 60px !important;
   font-weight: bold;
 }
 
@@ -332,7 +345,7 @@ td {
 
 .date {
   color: white !important;
-  font-size: 50px !important;
+  font-size: 35px !important;
   font-weight: bold;
 }
 
@@ -403,7 +416,7 @@ body {
   padding-top: 10px;
   padding-bottom: 5px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   max-height: 400px;
   overflow-y: scroll;
 }
@@ -425,7 +438,7 @@ body {
   padding-top: 5px;
   padding-bottom: 5px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   max-height: 420px;
   overflow-y: scroll;
   min-width: 360px;
@@ -532,7 +545,7 @@ body {
   padding-top: 10px;
   /* padding-bottom: 10px; */
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
 }
 
 .sneaky-links {
@@ -541,7 +554,7 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   /* width: 500px; */
 }
 
@@ -551,7 +564,7 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   /* width: 500px;
   margin: 50px; */
   font-weight: bold !important;
@@ -563,7 +576,7 @@ body {
   padding-right: 10px;
   padding-top: 10px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   /* width: 500px;
   margin: 50px; */
   font-weight: bold !important;
@@ -575,9 +588,33 @@ body {
   padding-top: 10px;
   padding-bottom: 5px;
   border-radius: 25px;
-  background-color: #212529;
+  background-color: var(--block-bg, #212529);
   /* width: 500px;
   margin-right: 100px; */
+}
+
+/* Block text color: when block background is light, use black text */
+.App .dining-hall .table-dark,
+.App .sneaky-links .table-dark,
+.App .weather .table,
+.App .street-week,
+.App .dance .table-dark,
+.App .tay .table-dark,
+.App .prince .table-dark {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--block-text, #fff);
+  color: var(--block-text, #fff) !important;
+}
+
+.App .dining-hall .table-dark th,
+.App .dining-hall .table-dark td,
+.App .sneaky-links .table-dark th,
+.App .sneaky-links .table-dark td,
+.App .weather .table th,
+.App .weather .table td {
+  background-color: transparent !important;
+  color: var(--block-text, #fff) !important;
+  border-color: rgba(128, 128, 128, 0.3) !important;
 }
 
 /* .dining-hall {

@@ -7,6 +7,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { TimeProvider } from "./context/TimeContext";
 import { StorageProvider } from "./context/StorageContext";
 import { MixpanelProvider } from "./context/MixpanelContext";
+import { BlockColorProvider } from "./context/BlockColorContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -18,7 +19,9 @@ root.render(
       <MixpanelProvider>
         <DataProvider>
           <ThemeProvider>
-            <App />
+            <BlockColorProvider>
+              <App />
+            </BlockColorProvider>
           </ThemeProvider>
         </DataProvider>
       </MixpanelProvider>

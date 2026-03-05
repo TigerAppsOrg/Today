@@ -14,11 +14,14 @@ import { useStorage } from "./context/StorageContext";
 import "react-sliding-pane/dist/react-sliding-pane.css";
 import "./App.css";
 import WeatherTable from "./components/Weather";
+import BlockColorPicker from "./components/BlockColorPicker";
+import { useBlockColor } from "./context/BlockColorContext";
 
 function App() {
   const time = useTime();
   const storage = useStorage();
   const mixpanel = useMixpanel();
+  const { blockColor, isLight } = useBlockColor();
 
   const [showWidgets, setShowWidgets] = useState(true); // Show widgets initially
 
@@ -31,9 +34,21 @@ function App() {
     setShowWidgets((prevShowWidgets) => !prevShowWidgets);
   };
 
+  const blockTextColor = isLight ? "#000" : "#fff";
+
   return (
     <Container fluid className="m-0">
-      <div className="App">
+      <div
+        className="App"
+        style={
+          {
+            "--block-bg": blockColor,
+            "--block-text": blockTextColor,
+          } as React.CSSProperties
+        }
+      >
+        {/* Top-left Block Color Picker */}
+        <BlockColorPicker />
         {/* Top-right StudyMode Button */}
         <div className="study-mode-top-right">
           <StudyMode toggleWidgets={toggleWidgets} />
@@ -45,10 +60,13 @@ function App() {
             style={{ zIndex: 10, position: "relative" }}
           >
             <Col>
-              <h1 className="centered greeting">
-                Good {time.timeOfDay} <Name />
-              </h1>
-              <h1 className="centered date">{time.dateString}</h1>
+              <div className="header-block">
+                <h1 className="centered greeting">
+                  Good {time.timeOfDay} <Name />
+                </h1>
+                <h1 className="centered date">{time.dateString}</h1>
+                <WeatherTable />
+              </div>
             </Col>
           </Row>
         )}
@@ -59,10 +77,6 @@ function App() {
               <DHallTable />
             </Col>
             <Col>
-              <Row className="my-4">
-                <WeatherTable />
-                {/* <Chat /> */}
-              </Row>
               <Row className="my-4">
                 <SneakyLinksTable />
               </Row>

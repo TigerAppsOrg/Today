@@ -1,7 +1,6 @@
 import Table from "react-bootstrap/Table";
 import React from "react";
 import { useData } from "../context/DataContext";
-import WidgetHeader from "./widget/WidgetHeader";
 
 type WeatherPoint = {
   temp: number;
@@ -28,7 +27,6 @@ function WeatherTable() {
     <div className={"weather"}>
       <Table variant="dark" borderless>
         <tbody>
-          <WidgetHeader title={"Weather"} />
           <tr className="centered weather">
             {times.map((time, i) => (
               <td key={i}>{time}</td>
