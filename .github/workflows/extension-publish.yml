@@ -1,0 +1,101 @@
+name: Publish Extension to Chrome Web Store
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/ext-v') || github.event_name == 'workflow_dispatch'
+    defaults:
+      run:
+        working-directory: extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Read version from manifest
+        id: version
+        run: echo "version=$(jq -r .version build/manifest.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Zip build folder
+        run: cd build && zip -r ../extension.zip .
+
+      - name: Upload to Chrome Web Store
+        run: |
+          # 1. Get an access token using the refresh token
+          ACCESS_TOKEN=$(curl -s -X POST "https://oauth2.googleapis.com/token" \
+            -d "client_id=${CHROME_CLIENT_ID}" \
+            -d "client_secret=${CHROME_CLIENT_SECRET}" \
+            -d "refresh_token=${CHROME_REFRESH_TOKEN}" \
+            -d "grant_type=refresh_token" | jq -r '.access_token')
+
+          if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to obtain access token"
+            exit 1
+          fi
+
+          # 2. Upload the zip
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "x-goog-api-version: 2" \
+            -X PUT \
+            -T extension.zip \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${CHROME_EXTENSION_ID}")
+
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -1)
+          BODY=$(echo "$UPLOAD_RESPONSE" | sed '$d')
+
+          echo "Upload response (HTTP $HTTP_CODE):"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+
+          UPLOAD_STATUS=$(echo "$BODY" | jq -r '.uploadState' 2>/dev/null)
+          if [ "$UPLOAD_STATUS" != "SUCCESS" ]; then
+            echo "Upload failed with status: $UPLOAD_STATUS"
+            exit 1
+          fi
+
+          # 3. Publish the uploaded item
+          PUBLISH_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Length: 0" \
+            -X POST \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/${CHROME_EXTENSION_ID}/publish")
+
+          HTTP_CODE=$(echo "$PUBLISH_RESPONSE" | tail -1)
+          BODY=$(echo "$PUBLISH_RESPONSE" | sed '$d')
+
+          echo "Publish response (HTTP $HTTP_CODE):"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+
+          PUBLISH_STATUS=$(echo "$BODY" | jq -r '.status[0]' 2>/dev/null)
+          if [ "$PUBLISH_STATUS" != "OK" ]; then
+            echo "Publish failed with status: $PUBLISH_STATUS"
+            exit 1
+          fi
+
+          echo "Successfully published extension v${{ steps.version.outputs.version }}"
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        run: gh release upload "${{ github.ref_name }}" extension.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

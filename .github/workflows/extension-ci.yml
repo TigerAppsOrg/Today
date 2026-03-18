@@ -1,0 +1,43 @@
+name: Extension CI
+
+on:
+  pull_request:
+    paths:
+      - "extension/**"
+  push:
+    branches: [main]
+    paths:
+      - "extension/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Verify manifest in build output
+        run: |
+          test -f build/manifest.json || { echo "manifest.json missing from build"; exit 1; }
+          echo "Build OK — manifest version: $(jq -r .version build/manifest.json)"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: extension/build
+          retention-days: 14
