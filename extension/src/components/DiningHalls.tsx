@@ -1,5 +1,4 @@
-import Table from "react-bootstrap/Table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import React from "react";
 import { StorageKeys, useStorage } from "../context/StorageContext";
@@ -30,10 +29,12 @@ const DINING_HALLS: DiningHall[] = [
 const DEFAULT_DHALL = DINING_HALLS[0].key;
 
 function DHallTable() {
+  const DROPDOWN_CLOSE_MS = 180;
   const storage = useStorage();
   const time = useTime();
   const data = useData();
   const mixpanel = useMixpanel();
+  const closeTimerRef = useRef<number | null>(null);
   const validResults = DINING_HALLS.map((diningHall) => diningHall.key);
 
   const [college, setCollege] = useState(
@@ -43,10 +44,20 @@ function DHallTable() {
       validResults
     )
   );
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownClosing, setIsDropdownClosing] = useState(false);
 
   useEffect(() => {
     storage.setLocalStorage(StorageKeys.DHALL, college);
   }, [college]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const currentDay = time.dayPrinceton;
   const currentHour = time.currentHourPrinceton;
@@ -82,18 +93,25 @@ function DHallTable() {
     "Salads",
   ];
 
-  const dhallData = data?.dhall?.[college]?.[meal] || null;
+  const dhallData = (data?.dhall?.[college]?.[meal] as Record<string, string[]> | null) || null;
+  const selectedHallLabel =
+    DINING_HALLS.find((diningHall) => diningHall.key === college)?.label ??
+    DEFAULT_DHALL;
   const orderedData: MealItem[] = [];
 
   if (dhallData) {
-    for (let i = 0; i < priority.length; i += 1) {
-      if (orderedData.length === 3) break;
-      if (!(priority[i] in dhallData)) continue;
+    const priorityCategories = priority.filter((category) => category in dhallData);
+    const remainingCategories = Object.keys(dhallData).filter(
+      (category) => !priority.includes(category)
+    );
+    const orderedCategories = [...priorityCategories, ...remainingCategories];
+
+    orderedCategories.forEach((category) => {
       orderedData.push({
-        cat: priority[i],
-        items: dhallData[priority[i]].slice(0, 3).join(", "),
+        cat: category,
+        items: dhallData[category].join(", "),
       });
-    }
+    });
   }
 
   const rows = orderedData.map((item, i) => {
@@ -115,40 +133,62 @@ function DHallTable() {
   }
 
   return (
-    <div className="dining-hall">
-      <Table variant="dark" borderless>
-        <tbody>
-          <tr className="centered">
-            <td>
-              <h3 className="bold">
-                What's for <mark>{meal}</mark>?
-              </h3>
-              <Dropdown
-                onSelect={(e) => {
-                  const dhall = e || DEFAULT_DHALL
-                  setCollege(dhall);
-                  mixpanel.trackEvent(EventTypes.DHALL_CHANGE, dhall)
-                }}
-              >
-                <Dropdown.Toggle className="dropdown">
-                  {college}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {DINING_HALLS.map((diningHall) => (
-                    <Dropdown.Item
-                      key={diningHall.key}
-                      eventKey={diningHall.key}
-                    >
-                      {diningHall.label}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-            </td>
-          </tr>
-          {rows}
-        </tbody>
-      </Table>
+    <div className="widget-card dining-hall">
+      <div className="widget-header dhall-header">
+        <div className="dhall-title-row">
+          <h3 className="bold dhall-title">
+            What's for <mark>{meal}</mark> at
+          </h3>
+          <Dropdown
+            className={`dhall-dropdown ${isDropdownClosing ? "is-closing" : ""}`}
+            show={isDropdownOpen}
+            onToggle={(nextShow) => {
+              if (closeTimerRef.current) {
+                window.clearTimeout(closeTimerRef.current);
+                closeTimerRef.current = null;
+              }
+
+              if (nextShow) {
+                setIsDropdownClosing(false);
+                setIsDropdownOpen(true);
+                return;
+              }
+
+              setIsDropdownClosing(true);
+              closeTimerRef.current = window.setTimeout(() => {
+                setIsDropdownOpen(false);
+                setIsDropdownClosing(false);
+                closeTimerRef.current = null;
+              }, DROPDOWN_CLOSE_MS);
+            }}
+            onSelect={(e) => {
+              const dhall = e || DEFAULT_DHALL;
+              setCollege(dhall);
+              mixpanel.trackEvent(EventTypes.DHALL_CHANGE, dhall);
+            }}
+          >
+            <Dropdown.Toggle className="dhall-dropdown-toggle">
+              {selectedHallLabel}
+            </Dropdown.Toggle>
+            <Dropdown.Menu
+              className={`dhall-dropdown-menu ${isDropdownClosing ? "is-closing" : ""}`}
+            >
+              {DINING_HALLS.map((diningHall) => (
+                <Dropdown.Item
+                  key={diningHall.key}
+                  eventKey={diningHall.key}
+                  className={diningHall.key === college ? "is-active" : ""}
+                >
+                  {diningHall.label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      </div>
+      <div className="widget-content">
+        {rows}
+      </div>
     </div>
   );
 }

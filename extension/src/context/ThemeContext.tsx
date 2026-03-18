@@ -23,11 +23,6 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   theme = themes[time.day % themes.length];
 
-  document.body.setAttribute(
-    "style",
-    `background-image:url(backgrounds/${theme.background}) !important;`
-  );
-
   return (
     <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );

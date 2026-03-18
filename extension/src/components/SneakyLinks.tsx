@@ -1,4 +1,3 @@
-import Table from "react-bootstrap/Table";
 import Canvas from "../images/canvas.png";
 import Docs from "../images/google-docs.png";
 import Gmail from "../images/gmail.png";
@@ -47,32 +46,28 @@ function SneakyLinksTable() {
   const mixpanel = useMixpanel();
 
   return (
-    <div className="sneaky-links">
-      <Table variant="dark" borderless>
-        <tbody>
-          <WidgetHeader title={"Sneaky Links"} />
-          <tr>
-            {sneakyLinks.map((link) => (
-              <td key={link.id} className="centered">
-                <a
-                  href={link.href}
-                  onClick={() =>
-                    mixpanel.trackEvent(EventTypes.LINKS_CLICK, link.id)
-                  }
-                >
-                  <img
-                    id={link.id}
-                    alt={link.alt}
-                    className="link-icon"
-                    src={link.src}
-                    style={link.style}
-                  />
-                </a>
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </Table>
+    <div className="widget-card sneaky-links">
+      <WidgetHeader title={"Sneaky Links"} />
+      <div className="sneaky-links-grid">
+        {sneakyLinks.map((link) => (
+          <a
+            key={link.id}
+            href={link.href}
+            className="sneaky-link-item"
+            onClick={() =>
+              mixpanel.trackEvent(EventTypes.LINKS_CLICK, link.id)
+            }
+          >
+            <img
+              id={link.id}
+              alt={link.alt}
+              className="link-icon"
+              src={link.src}
+              style={link.style}
+            />
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

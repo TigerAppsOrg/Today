@@ -1,4 +1,3 @@
-import Table from "react-bootstrap/Table";
 import TodayLogo from "../../images/logo.png";
 import React from "react";
 import { useData } from "../../context/DataContext";
@@ -33,20 +32,18 @@ function PrinceNewsTable(props: CarouselWidgetProps) {
   });
 
   return (
-    <div className="prince">
-      <Table variant="dark" borderless>
-        <tbody>
-          <CarouselHeader props={props}>
-            Today{" "}
-            <img
-              alt="Today"
-              style={{ width: 40, marginLeft: 5, marginBottom: 8 }}
-              src={TodayLogo}
-            />{" "}
-          </CarouselHeader>
-          {rows}
-        </tbody>
-      </Table>
+    <div className="widget-card prince">
+      <CarouselHeader props={props}>
+        Today{" "}
+        <img
+          alt="Today"
+          style={{ width: 40, marginLeft: 5, marginBottom: 8 }}
+          src={TodayLogo}
+        />{" "}
+      </CarouselHeader>
+      <div className="widget-content">
+        {rows}
+      </div>
     </div>
   );
 }
