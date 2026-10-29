@@ -10,7 +10,8 @@ on:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the pinned Python 3.10.13 build.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
